@@ -1,5 +1,5 @@
 ## &#128195; Description
-Node.js application where the user registers a movie, fills in some information (title, description, rating) and creates tags related to it.
+Node.js application where the user registers a movie, fills in some information (title, description, rating) and creates tags related to it. The user is able to search the notes appliyng filters: tags, title and rating.
 
 
 ## 🛠 Techs, Frameworks, Database & Platforms 
