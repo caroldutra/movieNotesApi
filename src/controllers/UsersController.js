@@ -1,8 +1,8 @@
+const { hash, compare } = require("bcryptjs");
 const sqliteConnection = require("../database/sqlite");
 const AppError = require("../utils/AppError");
-const { hash, compare } = require("bcryptjs");
 
-class UserController {
+class UsersController {
   async create(request, response) {
     const { name, email, password } = request.body;
     const database = await sqliteConnection();
@@ -13,7 +13,7 @@ class UserController {
     );
 
     if (checkUserExists) {
-      throw new AppError("Email já cadastrado!");
+      throw new AppError("Usuário já cadastrado!");
     }
 
     await database.run(
@@ -32,32 +32,31 @@ class UserController {
     const user = await database.get("SELECT * FROM users WHERE id = (?)", [
       user_id,
     ]);
-
-    if (!user) {
-      throw new AppError("Usuário não encontrado");
-    }
-
     const userWithUpdatedEmail = await database.get(
       "SELECT * FROM users WHERE email = (?)",
       [email]
     );
 
+    if (!user) {
+      throw new AppError("Usuário não encontrado");
+    }
+
     if (userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
-      throw new AppError("Esse email já está cadastrado por outro usuário");
+      throw new AppError("E-mail já cadastrado por outro usuário");
     }
 
     user.name = name ?? user.name;
     user.email = email ?? user.email;
 
     if (password && !old_password) {
-      throw new AppError("Digite a sua senha antiga!");
+      throw new AppError("Digite a senha antiga");
     }
 
     if (password && old_password) {
       const passwordOk = await compare(old_password, user.password);
 
       if (!passwordOk) {
-        throw new AppError("A senha antiga não confere!");
+        throw new AppError("A senha antiga não confere");
       }
 
       user.password = await hash(password, 8);
@@ -66,15 +65,15 @@ class UserController {
     await database.run(
       `UPDATE users SET 
       name = ?, 
-      email = ?,
+      email = ?, 
       password = ?, 
       updated_at = DATETIME('now') 
       WHERE id = ?`,
       [user.name, user.email, user.password, user_id]
     );
 
-    response.json();
+    return response.json();
   }
 }
 
-module.exports = UserController;
+module.exports = UsersController;
